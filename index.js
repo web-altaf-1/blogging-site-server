@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const port = process.env.PORT || 5000; 
+const port = process.env.PORT || 5000;
 
 
 // middleware 
@@ -19,8 +19,8 @@ const uri = `mongodb+srv://${process.env.REACT_APP_USERNAME}:${process.env.REACT
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
-async function run (){
-    try{
+async function run() {
+    try {
 
         await client.connect();
         console.log('database connected');
@@ -28,12 +28,34 @@ async function run (){
         const newPostCollection = client.db('postCollection').collection('newPost');
 
 
-        app.get('/posts',async(req,res)=>{
+        app.get('/posts', async (req, res) => {
+            console.log('query', req.query);
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
             const query = {};
+
             const cursor = postCollection.find(query);
-            const allPost = await cursor.toArray();
+
+            let allPost;
+
+            if (page || size) {
+                allPost = await cursor.skip((page-1) *8).limit(size).toArray();
+                console.log('Done');
+            }
+            else {
+
+                allPost = await cursor.toArray();
+            }
             res.send(allPost);
         });
+
+        app.get('/post-count', async (req, res) => {
+            const query = {};
+            const cursor = postCollection.find(query);
+            const count = await cursor.count();
+            res.send({ count })
+        });
+
 
         // post a new post
         app.post('/newpost', async (req, res) => {
@@ -44,9 +66,11 @@ async function run (){
         });
 
 
+
+
     }
-    finally{
-        
+    finally {
+
     }
 }
 
@@ -60,6 +84,6 @@ app.get('/', (req, res) => {
 
 
 
-app.listen(port,()=>{
-    console.log('listening to the port',port)
+app.listen(port, () => {
+    console.log('listening to the port', port)
 })
