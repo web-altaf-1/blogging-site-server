@@ -26,6 +26,7 @@ async function run() {
         console.log('database connected');
         const postCollection = client.db('postCollection').collection('post');
         const newPostCollection = client.db('postCollection').collection('newPost');
+        const commentCollection = client.db('postCollection').collection('comment');
 
 
         app.get('/posts', async (req, res) => {
@@ -39,7 +40,7 @@ async function run() {
             let allPost;
 
             if (page || size) {
-                allPost = await cursor.skip((page-1) *8).limit(size).toArray();
+                allPost = await cursor.skip((page - 1) * 8).limit(size).toArray();
                 console.log('Done');
             }
             else {
@@ -57,12 +58,14 @@ async function run() {
         });
 
 
-        app.get('/posts/:id',async(req,res)=>{
+        app.get('/posts/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id : ObjectId(id)};
+            const query = { _id: ObjectId(id) };
             const posts = await postCollection.findOne(query);
             res.send(posts);
-        })
+        });
+
+        
 
         // post a new post
         app.post('/newpost', async (req, res) => {
@@ -72,6 +75,14 @@ async function run() {
             res.send(result);
         });
 
+        // delete a post 
+
+        app.delete('/delete-post/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)};
+            const result = await postCollection.deleteOne(query);
+            res.send(result);
+        })
 
 
 
