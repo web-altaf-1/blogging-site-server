@@ -22,8 +22,10 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
 
+        
         await client.connect();
         console.log('database connected');
+
         const postCollection = client.db('postCollection').collection('post');
         const newPostCollection = client.db('postCollection').collection('newPost');
         const commentCollection = client.db('postCollection').collection('comment');
@@ -100,7 +102,7 @@ app.get('/', (req, res) => {
 });
 
 
-
+// some comment added
 
 app.listen(port, () => {
     console.log('listening to the port', port)
